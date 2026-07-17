@@ -95,6 +95,29 @@ npm run seed
 
 ---
 
+## 🚀 Deploy to Render
+
+The repo ships a [`render.yaml`](render.yaml) Blueprint that provisions both the
+API (web service) and the client (static site).
+
+1. **Database first.** Render has no managed MongoDB, so create a free
+   [MongoDB Atlas](https://www.mongodb.com/atlas) M0 cluster, add a database
+   user, allow network access from `0.0.0.0/0`, and copy the connection string.
+2. In Render: **New → Blueprint** and select this repo. It reads `render.yaml`
+   and proposes `meal-planner-api` and `meal-planner-client`.
+3. Fill the two prompted secrets:
+   - `MONGO_URI` → your Atlas connection string
+   - `VITE_API_URL` → the API URL **+ `/api`** (e.g. `https://meal-planner-api.onrender.com/api`)
+4. Apply. `JWT_SECRET` is auto-generated and `CLIENT_ORIGIN` (CORS) is auto-wired
+   from the client's URL. On first boot the API seeds Atlas automatically.
+
+Notes:
+- `VITE_API_URL` is baked in at **build time** — if you change it, trigger a
+  client **rebuild**, not just a restart.
+- Free web services cold-start after ~15 min idle; data persists in Atlas.
+
+---
+
 ## 🏗️ Project structure
 
 ```
