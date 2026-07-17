@@ -1,0 +1,47 @@
+# Render Blueprint — deploys the Meal Planner API (web service) and client
+# (static site) together. Import via Render → New → Blueprint, pointed at this repo.
+#
+# Still required manually (secrets / external DB — Render has no managed MongoDB):
+#   - Create a free MongoDB Atlas M0 cluster and set MONGO_URI on the API service.
+#   - Set VITE_API_URL on the client to the API's URL + /api (baked in at build time).
+# CLIENT_ORIGIN is wired automatically from the client site's URL (see below).
+
+services:
+  # ---- API: Express + Mongoose ----------------------------------------------
+  - type: web
+    name: meal-planner-api
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install          # NODE_ENV=production => skips devDeps
+    startCommand: npm start            # node src/index.js; reads $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI                 # REQUIRED — paste your Atlas URI in the dashboard
+        sync: false
+      - key: JWT_SECRET                # auto-generated strong secret
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CLIENT_ORIGIN             # auto-filled from the static site's URL (CORS)
+        fromService:
+          name: meal-planner-client
+          type: web
+          property: url
+
+  # ---- Client: Vite/React static site ---------------------------------------
+  - type: web
+    name: meal-planner-client
+    runtime: static
+    rootDir: client
+    buildCommand: npm install && npm run build   # no NODE_ENV=production: Vite needs devDeps
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL             # REQUIRED — set to https://<api-url>/api (build-time)
+        sync: false
+    routes:
+      - type: rewrite                 # SPA fallback so deep links (/grocery, …) don't 404
+        source: /*
+        destination: /index.html
