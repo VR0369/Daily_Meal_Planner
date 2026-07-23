@@ -6,13 +6,17 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import PageHeader from '../components/common/PageHeader.jsx';
+import { GRADIENTS } from '../theme/theme.js';
 import Icon from '../components/common/Icon.jsx';
 import ConfirmDialog from '../components/common/ConfirmDialog.jsx';
 import * as api from '../api/endpoints.js';
 import { useApp } from '../context/AppContext.jsx';
 
 const ICON_CHOICES = ['Restaurant', 'Spa', 'Grass', 'EggAlt', 'SetMeal', 'Egg', 'Forest', 'RiceBowl', 'LocalPizza', 'RamenDining', 'LunchDining', 'FitnessCenter', 'Grain', 'Icecream', 'Tune'];
-const COLOR_CHOICES = ['#2e7d32', '#43a047', '#ffa726', '#5c6bc0', '#26c6da', '#ab47bc', '#ef5350', '#ec407a', '#ff7043', '#9ccc65', '#90a4ae'];
+const COLOR_CHOICES = [
+  '#7C4DFF', '#FF2E93', '#FF9F1A', '#00C48C', '#00C2FF', '#FF4D6D',
+  '#B14BFF', '#FF6A3D', '#22D3A6', '#4C6FFF', '#F4C20D',
+];
 
 export default function Categories() {
   const { categories, loadCategories, notify } = useApp();
@@ -47,6 +51,7 @@ export default function Categories() {
     <Box>
       <PageHeader
         title="Meal Categories"
+        gradient={GRADIENTS.candy}
         subtitle="Categories power AI suggestions. Add your own — they're saved to the database."
         action={<Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpen(true)}>Add category</Button>}
       />
@@ -54,10 +59,25 @@ export default function Categories() {
       <Grid container spacing={2}>
         {categories.map((cat) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={cat.name}>
-            <Card variant="outlined" sx={{ height: '100%' }}>
+            <Card
+              variant="outlined"
+              sx={{
+                height: '100%',
+                // Every category wears its own colour, so the grid reads as a palette.
+                borderColor: `${cat.color}55`,
+                backgroundImage: `linear-gradient(155deg, ${cat.color}1F 0%, transparent 60%)`,
+                '&:hover': { transform: 'translateY(-6px)', boxShadow: `0 22px 40px -24px ${cat.color}` },
+              }}
+            >
               <CardContent>
                 <Stack direction="row" alignItems="center" spacing={1.5}>
-                  <Box sx={{ width: 44, height: 44, borderRadius: 2, display: 'grid', placeItems: 'center', bgcolor: cat.color, color: '#fff' }}>
+                  <Box
+                    sx={{
+                      width: 48, height: 48, borderRadius: '14px', display: 'grid', placeItems: 'center', color: '#fff',
+                      background: `linear-gradient(135deg, ${cat.color} 0%, ${cat.color}99 100%)`,
+                      boxShadow: `0 10px 20px -10px ${cat.color}`,
+                    }}
+                  >
                     <Icon name={cat.icon} />
                   </Box>
                   <Box sx={{ flexGrow: 1 }}>

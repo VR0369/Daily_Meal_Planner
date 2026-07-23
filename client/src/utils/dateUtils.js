@@ -10,6 +10,21 @@ export function todayISO() {
   return toISO(new Date());
 }
 
+// Dates coming back from the API are calendar days normalized to UTC midnight
+// (see server/src/utils/dates.js). Reading them with local getters shifts them a
+// day behind for anyone west of UTC, so pull the calendar day out in UTC.
+export function apiISO(value) {
+  if (!value) return null;
+  if (typeof value === 'string') {
+    // Already a plain YYYY-MM-DD, or an ISO timestamp whose date part is the day.
+    const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (match) return match[1];
+  }
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
+}
+
 export function addDaysISO(iso, days) {
   const [y, m, d] = iso.split('-').map(Number);
   const date = new Date(y, m - 1, d + days);

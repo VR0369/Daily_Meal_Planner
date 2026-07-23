@@ -8,6 +8,7 @@ import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import { useState } from 'react';
 import { useColorMode } from '../../context/ColorModeContext.jsx';
 import GlobalSearch from '../common/GlobalSearch.jsx';
+import { GRADIENTS } from '../../theme/theme.js';
 
 export default function TopNav({ onMenuClick }) {
   const { mode, preference, setPreference } = useColorMode();
@@ -26,14 +27,20 @@ export default function TopNav({ onMenuClick }) {
       color="inherit"
       sx={{
         zIndex: (t) => t.zIndex.drawer + 1,
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        backdropFilter: 'blur(8px)',
-        bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(22,29,33,0.85)' : 'rgba(255,255,255,0.85)'),
+        backdropFilter: 'blur(14px) saturate(180%)',
+        bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(11,7,19,0.72)' : 'rgba(255,255,255,0.72)'),
+        // Candy hairline instead of a grey border.
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          left: 0, right: 0, bottom: 0, height: 2,
+          background: GRADIENTS.candy,
+          opacity: 0.9,
+        },
       }}
     >
       <Toolbar sx={{ gap: 2 }}>
-        <IconButton edge="start" onClick={onMenuClick} sx={{ display: { md: 'none' } }}>
+        <IconButton edge="start" onClick={onMenuClick} sx={{ display: { md: 'none' }, color: 'primary.main' }}>
           <MenuIcon />
         </IconButton>
         <Box sx={{ flexGrow: 1, maxWidth: 460 }}>
@@ -41,7 +48,15 @@ export default function TopNav({ onMenuClick }) {
         </Box>
         <Box sx={{ flexGrow: 1 }} />
         <Tooltip title="Theme">
-          <IconButton onClick={(e) => setAnchor(e.currentTarget)}>
+          <IconButton
+            onClick={(e) => setAnchor(e.currentTarget)}
+            sx={{
+              color: '#fff',
+              background: mode === 'dark' ? GRADIENTS.ocean : GRADIENTS.sunrise,
+              transition: 'transform .2s ease',
+              '&:hover': { transform: 'rotate(-12deg) scale(1.08)', filter: 'brightness(1.08)' },
+            }}
+          >
             {mode === 'dark' ? <DarkModeIcon /> : <LightModeIcon />}
           </IconButton>
         </Tooltip>

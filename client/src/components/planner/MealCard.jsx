@@ -4,16 +4,9 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import RestaurantIcon from '@mui/icons-material/Restaurant';
 import IngredientBuilder from './IngredientBuilder.jsx';
-
-const MEAL_META = {
-  Breakfast: { icon: 'FreeBreakfast', color: '#ff9800' },
-  Lunch: { icon: 'LunchDining', color: '#4caf50' },
-  Dinner: { icon: 'DinnerDining', color: '#3f51b5' },
-  Snacks: { icon: 'Cookie', color: '#795548' },
-  Dessert: { icon: 'Icecream', color: '#e91e63' },
-};
+import Icon from '../common/Icon.jsx';
+import { mealMeta } from '../../utils/constants.js';
 
 /**
  * A single meal (Breakfast/Lunch/Dinner/…). Editing the name, ingredients or
@@ -22,21 +15,31 @@ const MEAL_META = {
 export default function MealCard({ meal, onNameChange, onIngredientsChange, onNotesChange }) {
   const needed = (meal.ingredients || []).filter((i) => i.status !== 'Available').length;
   const [expanded, setExpanded] = useState(Boolean(meal.mealName));
+  const meta = mealMeta(meal.mealType);
 
   return (
-    <Card variant="outlined">
+    <Card
+      variant="outlined"
+      sx={{
+        // Each meal type owns a colour — the card wears it on its top edge and wash.
+        borderTop: '4px solid', borderTopColor: meta.color,
+        backgroundImage: `linear-gradient(160deg, ${meta.color}14 0%, transparent 55%)`,
+        '&:hover': { boxShadow: `0 20px 40px -26px ${meta.color}` },
+      }}
+    >
       <CardContent>
         <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
           <Box
             sx={{
-              width: 40, height: 40, borderRadius: 2, display: 'grid', placeItems: 'center',
-              color: '#fff', bgcolor: MEAL_META[meal.mealType]?.color || 'primary.main',
+              width: 44, height: 44, borderRadius: '14px', display: 'grid', placeItems: 'center',
+              color: '#fff', background: meta.gradient,
+              boxShadow: `0 10px 20px -10px ${meta.color}`,
             }}
           >
-            <RestaurantIcon fontSize="small" />
+            <Icon name={meta.icon} fontSize="small" />
           </Box>
           <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="subtitle1">{meal.mealType}</Typography>
+            <Typography variant="subtitle1">{meta.emoji} {meal.mealType}</Typography>
             {meal.ingredients?.length > 0 && (
               <Typography variant="caption" color="text.secondary">
                 {meal.ingredients.length} ingredient{meal.ingredients.length > 1 ? 's' : ''}

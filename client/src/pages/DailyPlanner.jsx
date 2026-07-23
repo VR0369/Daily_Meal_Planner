@@ -6,11 +6,12 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import TodayIcon from '@mui/icons-material/Today';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import PageHeader from '../components/common/PageHeader.jsx';
+import { GRADIENTS } from '../theme/theme.js';
 import DayEditor from '../components/planner/DayEditor.jsx';
 import Loader from '../components/common/Loader.jsx';
 import * as api from '../api/endpoints.js';
 import { useApp } from '../context/AppContext.jsx';
-import { todayISO, addDaysISO, prettyDate, isTodayISO } from '../utils/dateUtils.js';
+import { todayISO, addDaysISO, apiISO, prettyDate, isTodayISO } from '../utils/dateUtils.js';
 
 export default function DailyPlanner() {
   const { notify } = useApp();
@@ -28,7 +29,7 @@ export default function DailyPlanner() {
     (async () => {
       try {
         const { data } = await api.getActiveDay();
-        const iso = data?.date ? new Date(data.date).toISOString().slice(0, 10) : todayISO();
+        const iso = apiISO(data?.date) || todayISO();
         if (!cancelled) setDateISO(iso);
       } catch {
         if (!cancelled) setDateISO(todayISO());
@@ -61,6 +62,7 @@ export default function DailyPlanner() {
     <Box>
       <PageHeader
         title="Daily Planner"
+        gradient={GRADIENTS.sunrise}
         subtitle={prettyDate(dateISO)}
         action={
           <Tooltip title="Copy this day's meals to tomorrow">

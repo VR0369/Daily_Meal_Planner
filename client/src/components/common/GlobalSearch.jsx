@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import * as api from '../../api/endpoints.js';
-import { toISO, prettyDate } from '../../utils/dateUtils.js';
+import { apiISO, prettyDate } from '../../utils/dateUtils.js';
 
 /**
  * Global search across meal names, ingredients, categories and dates.
@@ -51,7 +51,7 @@ export default function GlobalSearch() {
       getOptionLabel={(o) => (typeof o === 'string' ? o : o.mealName || o.matchedIngredient || '')}
       onChange={(_, value) => {
         if (value && typeof value !== 'string') {
-          navigate(`/daily?date=${toISO(new Date(value.date))}`);
+          navigate(`/daily?date=${apiISO(value.date)}`);
           setInput('');
         }
       }}
@@ -67,7 +67,7 @@ export default function GlobalSearch() {
               <Chip size="small" label={option.mealType} variant="outlined" />
             </Box>
             <Typography variant="caption" color="text.secondary">
-              {prettyDate(toISO(new Date(option.date)))}
+              {prettyDate(apiISO(option.date))}
               {option.category ? ` • ${option.category}` : ''}
               {option.matchedIngredient && option.mealName ? ` • ingredient: ${option.matchedIngredient}` : ''}
             </Typography>

@@ -7,6 +7,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import PageHeader from '../components/common/PageHeader.jsx';
+import { GRADIENTS } from '../theme/theme.js';
 import Loader from '../components/common/Loader.jsx';
 import ConfirmDialog from '../components/common/ConfirmDialog.jsx';
 import DayEditor from '../components/planner/DayEditor.jsx';
@@ -14,7 +15,7 @@ import * as api from '../api/endpoints.js';
 import { useApp } from '../context/AppContext.jsx';
 import { completionBg } from '../theme/theme.js';
 import {
-  toISO, monthName, monthGrid, weekdayHeaders, prettyDate, isTodayISO,
+  toISO, apiISO, monthName, monthGrid, weekdayHeaders, prettyDate, isTodayISO,
 } from '../utils/dateUtils.js';
 import { COMPLETION_LABEL } from '../utils/constants.js';
 
@@ -36,7 +37,7 @@ export default function MonthlyPlanner() {
       const { data } = await api.getMonth(anchor);
       const map = {};
       data.forEach((d) => {
-        map[toISO(new Date(d.date))] = d;
+        map[apiISO(d.date)] = d;
       });
       setByDate(map);
     } finally {
@@ -62,7 +63,8 @@ export default function MonthlyPlanner() {
     <Box>
       <PageHeader
         title="Monthly Planner"
-        subtitle="White = empty · Yellow = some meals · Green = full day"
+        gradient={GRADIENTS.ocean}
+        subtitle="Clear = empty · Amber = some meals · Mint = full day"
         action={
           <Stack direction="row" alignItems="center" spacing={1}>
             <IconButton onClick={() => changeMonth(-1)}><ChevronLeftIcon /></IconButton>
@@ -102,18 +104,22 @@ export default function MonthlyPlanner() {
                       onClick={() => setSelected(iso)}
                       sx={{
                         cursor: 'pointer',
-                        borderRadius: 2,
-                        border: '1px solid',
-                        borderColor: today ? 'primary.main' : 'divider',
-                        outline: today ? `1px solid ${theme.palette.primary.main}` : 'none',
+                        borderRadius: '14px',
+                        border: '2px solid',
+                        borderColor: today ? 'secondary.main' : 'divider',
                         bgcolor: completionBg(info.completion, theme.palette.mode),
+                        boxShadow: today ? '0 14px 28px -18px rgba(255,46,147,.9)' : 'none',
                         minHeight: { xs: 58, sm: 84 },
                         p: 1,
-                        transition: 'transform .12s ease',
-                        '&:hover': { transform: 'translateY(-2px)', boxShadow: 2 },
+                        transition: 'transform .16s cubic-bezier(.2,.8,.3,1), box-shadow .16s ease',
+                        '&:hover': { transform: 'translateY(-4px) scale(1.03)', boxShadow: 6 },
                       }}
                     >
-                      <Typography variant="caption" fontWeight={today ? 700 : 500} color={today ? 'primary.main' : 'text.primary'}>
+                      <Typography
+                        variant="caption"
+                        fontWeight={today ? 800 : 600}
+                        color={today ? 'secondary.main' : 'text.primary'}
+                      >
                         {Number(iso.slice(8, 10))}
                       </Typography>
                       <Box sx={{ mt: 0.5, display: { xs: 'none', sm: 'block' } }}>

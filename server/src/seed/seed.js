@@ -12,12 +12,18 @@ import { connectDB, disconnectDB } from '../config/db.js';
 /**
  * Seed default categories (idempotent) and, when there are no meal plans yet, a
  * few sample days so the dashboard/calendar aren't empty on first run.
+ *
+ * Built-ins aren't user-editable, so their colour/icon are re-applied on every
+ * run — that way palette changes reach installs seeded before the change.
  */
 export async function seedCategories() {
-  for (const cat of DEFAULT_CATEGORIES) {
+  for (const { name, color, icon, ...rest } of DEFAULT_CATEGORIES) {
     await Category.updateOne(
-      { name: cat.name, user: null },
-      { $setOnInsert: { ...cat, user: null, isCustom: false } },
+      { name, user: null },
+      {
+        $set: { color, icon },
+        $setOnInsert: { ...rest, name, user: null, isCustom: false },
+      },
       { upsert: true }
     );
   }

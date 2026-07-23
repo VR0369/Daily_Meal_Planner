@@ -9,11 +9,12 @@ import TodayIcon from '@mui/icons-material/Today';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EditIcon from '@mui/icons-material/Edit';
 import PageHeader from '../components/common/PageHeader.jsx';
+import { GRADIENTS } from '../theme/theme.js';
 import Loader from '../components/common/Loader.jsx';
 import * as api from '../api/endpoints.js';
 import { useApp } from '../context/AppContext.jsx';
-import { todayISO, addDaysISO, toISO, dayName, prettyDate, isTodayISO } from '../utils/dateUtils.js';
-import { CORE_MEAL_TYPES, MEAL_TYPES } from '../utils/constants.js';
+import { todayISO, addDaysISO, apiISO, fromISO, dayName, prettyDate, isTodayISO } from '../utils/dateUtils.js';
+import { CORE_MEAL_TYPES, MEAL_TYPES, mealMeta } from '../utils/constants.js';
 
 export default function WeeklyPlanner() {
   const navigate = useNavigate();
@@ -48,13 +49,14 @@ export default function WeeklyPlanner() {
 
   const rangeLabel =
     days.length === 7
-      ? `${prettyDate(toISO(new Date(days[0].date)), { withYear: false })} – ${prettyDate(toISO(new Date(days[6].date)))}`
+      ? `${prettyDate(apiISO(days[0].date), { withYear: false })} – ${prettyDate(apiISO(days[6].date))}`
       : '';
 
   return (
     <Box>
       <PageHeader
         title="Weekly Planner"
+        gradient={GRADIENTS.mint}
         subtitle={rangeLabel}
         action={
           <Tooltip title="Duplicate this week's meals into next week">
@@ -76,7 +78,7 @@ export default function WeeklyPlanner() {
       ) : (
         <Grid container spacing={2} columns={{ xs: 1, sm: 2, md: 7 }}>
           {days.map(({ date, plan }) => {
-            const iso = toISO(new Date(date));
+            const iso = apiISO(date);
             const today = isTodayISO(iso);
             const meals = plan?.meals
               ? [...plan.meals].sort((a, b) => MEAL_TYPES.indexOf(a.mealType) - MEAL_TYPES.indexOf(b.mealType))
@@ -87,16 +89,24 @@ export default function WeeklyPlanner() {
                   variant="outlined"
                   sx={{
                     height: '100%',
-                    borderColor: today ? 'primary.main' : 'divider',
+                    borderColor: today ? 'secondary.main' : 'divider',
                     borderWidth: today ? 2 : 1,
+                    // Today's column glows; the rest stay calm so it stands out.
+                    backgroundImage: today
+                      ? 'linear-gradient(160deg, rgba(255,46,147,.16), rgba(124,77,255,.06))'
+                      : 'none',
+                    boxShadow: today ? '0 18px 36px -24px rgba(255,46,147,.9)' : 'none',
+                    '&:hover': { transform: 'translateY(-4px)' },
                   }}
                 >
                   <CardContent sx={{ p: 1.5 }}>
                     <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
                       <Box>
-                        <Typography variant="subtitle2">{dayName(iso).slice(0, 3)}</Typography>
+                        <Typography variant="subtitle2" color={today ? 'secondary.main' : 'text.primary'}>
+                          {dayName(iso).slice(0, 3)}
+                        </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {new Date(date).getDate()}
+                          {fromISO(iso).getDate()}
                         </Typography>
                       </Box>
                       <Box sx={{ flexGrow: 1 }} />
@@ -107,9 +117,19 @@ export default function WeeklyPlanner() {
                     <Divider sx={{ mb: 1 }} />
                     {CORE_MEAL_TYPES.map((type) => {
                       const meal = meals.find((m) => m.mealType === type);
+                      const meta = mealMeta(type);
                       return (
-                        <Box key={type} sx={{ mb: 1 }}>
-                          <Typography variant="caption" color="text.secondary" display="block">{type}</Typography>
+                        <Box
+                          key={type}
+                          sx={{
+                            mb: 1, pl: 1, borderLeft: '3px solid', borderColor: meta.color,
+                            borderRadius: '0 8px 8px 0',
+                            bgcolor: meal?.mealName ? `${meta.color}14` : 'transparent',
+                          }}
+                        >
+                          <Typography variant="caption" display="block" sx={{ color: meta.color, fontWeight: 700 }}>
+                            {meta.emoji} {type}
+                          </Typography>
                           <Typography variant="body2" noWrap title={meal?.mealName || ''}>
                             {meal?.mealName || <span style={{ opacity: 0.4 }}>—</span>}
                           </Typography>
@@ -117,7 +137,7 @@ export default function WeeklyPlanner() {
                       );
                     })}
                     {plan?.completion === 'complete' && (
-                      <Chip size="small" color="success" label="Complete" sx={{ mt: 0.5 }} />
+                      <Chip size="small" color="success" label="✓ Complete" sx={{ mt: 0.5, color: '#fff' }} />
                     )}
                   </CardContent>
                 </Card>

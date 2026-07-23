@@ -1,19 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Grid, Card, CardContent, Box, Typography, Button, Chip, Stack, List, ListItem, ListItemText, Divider, Paper,
+  Grid, Card, CardContent, Box, Typography, Button, Chip, Stack, List, ListItem, ListItemText,
+  Divider, LinearProgress,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import * as api from '../api/endpoints.js';
 import StatCard from '../components/common/StatCard.jsx';
 import EmptyState from '../components/common/EmptyState.jsx';
 import Loader from '../components/common/Loader.jsx';
-import PageHeader from '../components/common/PageHeader.jsx';
+import HeroBanner from '../components/dashboard/HeroBanner.jsx';
+import MealTimeline from '../components/dashboard/MealTimeline.jsx';
 import NewPlanDialog from '../components/planner/NewPlanDialog.jsx';
 import useMidnightRefresh from '../hooks/useMidnightRefresh.js';
 import { useApp } from '../context/AppContext.jsx';
-import { prettyDate, toISO, todayISO } from '../utils/dateUtils.js';
-import { MEAL_TYPES } from '../utils/constants.js';
+import { prettyDate, apiISO, todayISO } from '../utils/dateUtils.js';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ export default function Dashboard() {
   useMidnightRefresh(load);
 
   const handleCreate = async ({ category, duration, mealTypes }) => {
-    const date = active?.date ? toISO(new Date(active.date)) : todayISO();
+    const date = apiISO(active?.date) || todayISO();
     try {
       await api.createPlan({ date, category, duration, mealTypes });
       setDialogOpen(false);
@@ -57,67 +58,67 @@ export default function Dashboard() {
 
   if (loading) return <Loader label="Loading your dashboard…" />;
 
-  const activeDateISO = active?.date ? toISO(new Date(active.date)) : todayISO();
+  const activeDateISO = apiISO(active?.date) || todayISO();
   const plan = active?.plan;
+  const openPlanner = () => navigate(`/daily?date=${activeDateISO}`);
 
   return (
     <Box>
-      <PageHeader
-        title="Dashboard"
-        subtitle={active?.isToday ? "Here's your plan for today" : `Today is planned — showing ${prettyDate(activeDateISO)}`}
-        action={
-          <Button variant="contained" size="large" startIcon={<AddIcon />} onClick={() => setDialogOpen(true)}>
-            New Meal Plan
-          </Button>
-        }
+      <HeroBanner
+        dateISO={activeDateISO}
+        isToday={active?.isToday}
+        completion={stats.completionPercentage}
+        mealsPlanned={stats.mealsPlanned}
+        mealsRemaining={stats.mealsRemaining}
+        onNewPlan={() => setDialogOpen(true)}
       />
 
-      <Grid container spacing={2} sx={{ mb: 1 }}>
-        <Grid item xs={6} md={3}><StatCard label="Meals Planned" value={stats.mealsPlanned} icon="RestaurantMenu" color="primary" /></Grid>
-        <Grid item xs={6} md={3}><StatCard label="Meals Remaining" value={stats.mealsRemaining} icon="PendingActions" color="warning" /></Grid>
-        <Grid item xs={6} md={3}><StatCard label="Days Completed" value={stats.daysCompleted} icon="EventAvailable" color="success" /></Grid>
+      <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={6} md={3}>
-          <StatCard label="Completion" value={stats.completionPercentage} suffix="%" icon="Insights" color="secondary" progress={stats.completionPercentage} />
+          <StatCard label="Meals Planned" value={stats.mealsPlanned} icon="RestaurantMenu" color="primary" delay={0} />
         </Grid>
-        <Grid item xs={6} md={3}><StatCard label="Ingredients Needed" value={stats.ingredientsNeeded} icon="ShoppingCart" color="warning" /></Grid>
-        <Grid item xs={6} md={3}><StatCard label="Ingredients Purchased" value={stats.ingredientsPurchased} icon="CheckCircle" color="success" /></Grid>
-        <Grid item xs={12} md={6}>
-          <UpcomingCard upcoming={stats.upcomingMeals} />
+        <Grid item xs={6} md={3}>
+          <StatCard label="Meals Remaining" value={stats.mealsRemaining} icon="PendingActions" color="warning" delay={80} />
+        </Grid>
+        <Grid item xs={6} md={3}>
+          <StatCard label="Days Completed" value={stats.daysCompleted} icon="EventAvailable" color="success" delay={160} />
+        </Grid>
+        <Grid item xs={6} md={3}>
+          <StatCard
+            label="Completion"
+            value={stats.completionPercentage}
+            suffix="%"
+            icon="Insights"
+            color="secondary"
+            progress={stats.completionPercentage}
+            delay={240}
+          />
         </Grid>
       </Grid>
 
-      <Grid container spacing={2} sx={{ mt: 0.5 }}>
-        <Grid item xs={12}>
+      <Grid container spacing={2} alignItems="flex-start">
+        <Grid item xs={12} md={7}>
           <Card variant="outlined">
             <CardContent>
-              <Stack direction="row" alignItems="center" sx={{ mb: 2 }}>
-                <Typography variant="h6">
-                  {active?.isToday ? "Today's meals" : `Meals for ${prettyDate(activeDateISO)}`}
-                </Typography>
+              <Stack direction="row" alignItems="center" sx={{ mb: 2.5 }}>
+                <Box>
+                  <Typography variant="h6">
+                    {active?.isToday ? "Today's meals" : `Meals for ${prettyDate(activeDateISO)}`}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Your day, in order
+                  </Typography>
+                </Box>
                 <Box sx={{ flexGrow: 1 }} />
                 {plan && (
-                  <Button onClick={() => navigate(`/daily?date=${activeDateISO}`)}>Open in planner</Button>
+                  <Button endIcon={<ArrowForwardIcon />} onClick={openPlanner}>
+                    Open in planner
+                  </Button>
                 )}
               </Stack>
 
               {plan ? (
-                <Grid container spacing={2}>
-                  {[...plan.meals]
-                    .sort((a, b) => MEAL_TYPES.indexOf(a.mealType) - MEAL_TYPES.indexOf(b.mealType))
-                    .map((meal) => (
-                      <Grid item xs={12} sm={6} md={4} key={meal.mealType}>
-                        <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
-                          <Chip size="small" label={meal.mealType} color="primary" variant="outlined" sx={{ mb: 1 }} />
-                          <Typography variant="subtitle1">{meal.mealName || <em style={{ opacity: 0.6 }}>Not set</em>}</Typography>
-                          {meal.ingredients?.length > 0 && (
-                            <Typography variant="caption" color="text.secondary">
-                              {meal.ingredients.map((i) => i.name).filter(Boolean).join(', ')}
-                            </Typography>
-                          )}
-                        </Paper>
-                      </Grid>
-                    ))}
-                </Grid>
+                <MealTimeline meals={plan.meals} isToday={active?.isToday} onOpen={openPlanner} />
               ) : (
                 <EmptyState
                   icon="RestaurantMenu"
@@ -130,6 +131,17 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </Grid>
+
+        <Grid item xs={12} md={5}>
+          <Stack spacing={2}>
+            <PantryCard
+              needed={stats.ingredientsNeeded}
+              purchased={stats.ingredientsPurchased}
+              onOpen={() => navigate('/grocery')}
+            />
+            <UpcomingCard upcoming={stats.upcomingMeals} />
+          </Stack>
+        </Grid>
       </Grid>
 
       <NewPlanDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onCreate={handleCreate} />
@@ -137,9 +149,42 @@ export default function Dashboard() {
   );
 }
 
+/** Shopping progress: how much of the list has actually been bought. */
+function PantryCard({ needed, purchased, onOpen }) {
+  const total = needed + purchased;
+  const pct = total ? Math.round((purchased / total) * 100) : 0;
+
+  return (
+    <Card variant="outlined">
+      <CardContent>
+        <Stack direction="row" alignItems="center" sx={{ mb: 1.5 }}>
+          <Typography variant="h6">Grocery progress</Typography>
+          <Box sx={{ flexGrow: 1 }} />
+          <Button size="small" endIcon={<ArrowForwardIcon />} onClick={onOpen}>List</Button>
+        </Stack>
+
+        <Stack direction="row" alignItems="baseline" spacing={1}>
+          <Typography variant="h4">{purchased}</Typography>
+          <Typography variant="body2" color="text.secondary">of {total} items purchased</Typography>
+        </Stack>
+
+        <LinearProgress
+          variant="determinate"
+          value={pct}
+          color={pct === 100 ? 'success' : 'warning'}
+          sx={{ mt: 1.5, height: 10, borderRadius: 5 }}
+        />
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+          {needed > 0 ? `${needed} still to pick up` : 'Everything on the list is bought'}
+        </Typography>
+      </CardContent>
+    </Card>
+  );
+}
+
 function UpcomingCard({ upcoming }) {
   return (
-    <Card variant="outlined" sx={{ height: '100%' }}>
+    <Card variant="outlined">
       <CardContent>
         <Typography variant="h6" gutterBottom>Upcoming meals</Typography>
         {upcoming?.length ? (
@@ -147,10 +192,14 @@ function UpcomingCard({ upcoming }) {
             {upcoming.map((m, i) => (
               <Box key={`${m.date}-${m.mealType}-${i}`}>
                 {i > 0 && <Divider component="li" />}
-                <ListItem disableGutters secondaryAction={<Chip size="small" label={m.mealType} variant="outlined" />}>
+                <ListItem
+                  disableGutters
+                  secondaryAction={<Chip size="small" label={m.mealType} variant="outlined" />}
+                  sx={{ transition: 'padding .18s ease', '&:hover': { pl: 1 } }}
+                >
                   <ListItemText
                     primary={m.mealName}
-                    secondary={prettyDate(toISO(new Date(m.date)), { withYear: false })}
+                    secondary={prettyDate(apiISO(m.date), { withYear: false })}
                   />
                 </ListItem>
               </Box>

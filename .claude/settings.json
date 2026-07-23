@@ -3,7 +3,35 @@
     "allow": [
       "Bash(npm run *)",
       "Bash(npm approve-scripts *)",
-      "Bash(break)"
+      "Bash(break)",
+      "Bash(curl -s http://localhost:5000/api/health)",
+      "Bash(curl -s http://localhost:5000/api/dashboard/stats)",
+      "Bash(curl -s -o /dev/null -w \"proxy:%{http_code}\\\\n\" http://localhost:5174/api/mealplans/active)",
+      "Bash('/c/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --hide-scrollbars --window-size=1440,1000 --virtual-time-budget=9000 --screenshot=C:/Users/vijay/AppData/Local/Temp/claude/c--Users-vijay-Documents-Project-Daily-Meal-Planner/70bd3584-61c2-4d20-a726-ef7ccda75a94/scratchpad/dashboard.png http://localhost:5174/)",
+      "Bash(curl -s http://localhost:5000/api/mealplans/active)",
+      "Bash(curl -s -o /dev/null -w \"api:%{http_code}\\\\n\" http://localhost:5000/api/health)",
+      "Bash(curl -s -o /dev/null -w \"client:%{http_code}\\\\n\" http://localhost:5174/)",
+      "PowerShell(try { Resolve-DnsName -Type SRV _mongodb._tcp.daily-meal-planner.flmxfgo.mongodb.net -ErrorAction Stop | Select-Object -First 4 Name,NameTarget,Port } catch { \"DEFAULT DNS FAILED: $\\($_.Exception.Message\\)\" })",
+      "PowerShell(node -e \"const dns=require\\('dns'\\); console.log\\('servers:', dns.getServers\\(\\)\\); dns.resolveSrv\\('_mongodb._tcp.daily-meal-planner.flmxfgo.mongodb.net',\\(e,r\\)=>console.log\\(e?\\('ERR '+e.message\\):r\\)\\);\")",
+      "PowerShell(node -e \"const dns=require\\('dns'\\); dns.lookup\\('ac-voy1xyp-shard-00-00.flmxfgo.mongodb.net',\\(e,a\\)=>console.log\\('lookup\\(OS\\):', e?\\('ERR '+e.message\\):a\\)\\);\")",
+      "PowerShell(Resolve-DnsName -Type TXT daily-meal-planner.flmxfgo.mongodb.net)",
+      "Bash(node -e ' *)",
+      "Bash('/c/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --hide-scrollbars --window-size=1440,1000 --virtual-time-budget=9000 --screenshot=C:/Users/vijay/AppData/Local/Temp/claude/c--Users-vijay-Documents-Project-Daily-Meal-Planner/70bd3584-61c2-4d20-a726-ef7ccda75a94/scratchpad/atlas.png http://localhost:5174/)",
+      "Bash('/c/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --hide-scrollbars --window-size=1440,1100 --virtual-time-budget=10000 --screenshot=C:/Users/vijay/AppData/Local/Temp/claude/c--Users-vijay-Documents-Project-Daily-Meal-Planner/ca714a1d-3d53-4eb7-b42a-4df60541a63e/scratchpad/dashboard.png http://localhost:5173/)",
+      "Bash('/c/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --hide-scrollbars --window-size=1440,1200 --virtual-time-budget=12000 --screenshot=C:/Users/vijay/AppData/Local/Temp/claude/c--Users-vijay-Documents-Project-Daily-Meal-Planner/ca714a1d-3d53-4eb7-b42a-4df60541a63e/scratchpad/dash2.png http://localhost:5174/)",
+      "Bash(grep -n -A3 \"PageHeader$\" client/src/pages/DailyPlanner.jsx)",
+      "Bash(curl -s -o /dev/null http://localhost:5000/api/health)",
+      "Bash(curl -s http://localhost:5173/ -o /dev/null -w \"client:%{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:5174/ -o /dev/null -w \"client5174:%{http_code}\\\\n\")",
+      "Bash(python -)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 5000 -State Listen | Select-Object -ExpandProperty OwningProcess | ForEach-Object { Get-Process -Id $_ | Select-Object Id, ProcessName, Path })",
+      "PowerShell(\\(Get-CimInstance Win32_Process -Filter \"ProcessId = 2120\"\\).CommandLine)",
+      "PowerShell(Stop-Process -Id 2120 -Force)",
+      "PowerShell(\"killed\")",
+      "Bash(touch src/index.js)",
+      "Bash('/c/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --hide-scrollbars --window-size=1440,1100 --virtual-time-budget=8000 --screenshot=C:/Users/vijay/AppData/Local/Temp/claude/c--Users-vijay-Documents-Project-Daily-Meal-Planner/ae0d47ec-f655-4d42-b44d-122e60a0fc71/scratchpad/v3-dashboard.png http://localhost:5180/)",
+      "Bash('/c/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --hide-scrollbars --window-size=1440,900 --virtual-time-budget=8000 --screenshot=C:/Users/vijay/AppData/Local/Temp/claude/c--Users-vijay-Documents-Project-Daily-Meal-Planner/ae0d47ec-f655-4d42-b44d-122e60a0fc71/scratchpad/v3-monthly.png http://localhost:5180/monthly)",
+      "Bash('/c/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --hide-scrollbars --window-size=1440,900 --force-dark-mode --virtual-time-budget=8000 --screenshot=C:/Users/vijay/AppData/Local/Temp/claude/c--Users-vijay-Documents-Project-Daily-Meal-Planner/ae0d47ec-f655-4d42-b44d-122e60a0fc71/scratchpad/v3-dark.png http://localhost:5180/weekly)"
     ]
   }
 }

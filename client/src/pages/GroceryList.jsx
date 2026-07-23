@@ -8,11 +8,12 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BlockIcon from '@mui/icons-material/Block';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PageHeader from '../components/common/PageHeader.jsx';
+import { GRADIENTS } from '../theme/theme.js';
 import Loader from '../components/common/Loader.jsx';
 import EmptyState from '../components/common/EmptyState.jsx';
 import * as api from '../api/endpoints.js';
 import { useApp } from '../context/AppContext.jsx';
-import { prettyDate, toISO } from '../utils/dateUtils.js';
+import { prettyDate, apiISO } from '../utils/dateUtils.js';
 import { STATUS_COLOR } from '../utils/constants.js';
 
 export default function GroceryList() {
@@ -66,6 +67,7 @@ export default function GroceryList() {
     <Box>
       <PageHeader
         title="Grocery List"
+        gradient={GRADIENTS.berry}
         subtitle="Auto-generated from every ingredient marked Not Available or Need More"
         action={<Button variant="outlined" startIcon={<RefreshIcon />} onClick={refresh}>Refresh</Button>}
       />
@@ -78,21 +80,43 @@ export default function GroceryList() {
         />
       ) : (
         <>
-          <Card variant="outlined" sx={{ mb: 2 }}>
+          <Card
+            variant="outlined"
+            sx={{
+              mb: 2,
+              backgroundImage: 'linear-gradient(120deg, rgba(255,46,147,.14), rgba(124,77,255,.08))',
+              borderColor: 'secondary.light',
+            }}
+          >
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2}>
-                <Typography variant="body2" color="text.secondary">
-                  {done.length} of {items.length} purchased
+                <Typography variant="body2" fontWeight={700}>
+                  🛒 {done.length} of {items.length} purchased
                 </Typography>
                 <Box sx={{ flexGrow: 1 }}>
-                  <LinearProgress variant="determinate" value={progress} sx={{ height: 8, borderRadius: 5 }} />
+                  <LinearProgress
+                    variant="determinate"
+                    value={progress}
+                    color={progress === 100 ? 'success' : 'secondary'}
+                    sx={{ height: 12, bgcolor: 'rgba(124,77,255,.14)' }}
+                  />
                 </Box>
-                <Typography variant="body2" fontWeight={700}>{progress}%</Typography>
+                <Typography
+                  variant="body2"
+                  fontWeight={800}
+                  sx={{
+                    background: GRADIENTS.berry,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  {progress}%
+                </Typography>
               </Stack>
             </CardContent>
           </Card>
 
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>To buy ({toBuy.length})</Typography>
+          <Typography variant="subtitle1" sx={{ mb: 1 }}>🧺 To buy ({toBuy.length})</Typography>
           <Grid container spacing={2}>
             {toBuy.map((item) => (
               <Grid item xs={12} md={6} key={item._id}>
@@ -108,7 +132,7 @@ export default function GroceryList() {
           {done.length > 0 && (
             <>
               <Divider sx={{ my: 3 }} />
-              <Typography variant="subtitle1" sx={{ mb: 1 }}>Purchased ({done.length})</Typography>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>✅ Purchased ({done.length})</Typography>
               <Grid container spacing={2}>
                 {done.map((item) => (
                   <Grid item xs={12} md={6} key={item._id}>
@@ -147,7 +171,18 @@ export default function GroceryList() {
 function GroceryCard({ item, onPurchase, onCannotFind, purchased }) {
   const [showSources, setShowSources] = useState(false);
   return (
-    <Card variant="outlined" sx={{ opacity: purchased ? 0.7 : 1 }}>
+    <Card
+      variant="outlined"
+      sx={{
+        opacity: purchased ? 0.72 : 1,
+        borderLeft: '5px solid',
+        borderLeftColor: purchased ? 'success.main' : 'secondary.main',
+        backgroundImage: purchased
+          ? 'linear-gradient(120deg, rgba(0,196,140,.12), transparent 60%)'
+          : 'linear-gradient(120deg, rgba(255,46,147,.10), transparent 60%)',
+        '&:hover': { transform: 'translateY(-3px)', boxShadow: 4 },
+      }}
+    >
       <CardContent>
         <Stack direction="row" alignItems="center" spacing={1}>
           <Box sx={{ flexGrow: 1 }}>
@@ -185,7 +220,7 @@ function GroceryCard({ item, onPurchase, onCannotFind, purchased }) {
           <Stack spacing={0.5}>
             {item.sources.map((s, i) => (
               <Typography key={i} variant="caption" color="text.secondary">
-                {s.meal}{s.mealName ? ` (${s.mealName})` : ''} · {prettyDate(toISO(new Date(s.day)), { withYear: false })}
+                {s.meal}{s.mealName ? ` (${s.mealName})` : ''} · {prettyDate(apiISO(s.day), { withYear: false })}
                 {s.quantity ? ` · qty ${s.quantity}` : ''} · {s.status}
               </Typography>
             ))}
